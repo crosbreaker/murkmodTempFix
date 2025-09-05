@@ -26,7 +26,7 @@ lsbval() {
 }
 
 get_asset() {
-    curl -s -f "https://api.github.com/repos/rainestorme/murkmod/contents/$1" | jq -r ".content" | base64 -d
+    curl -s -f "https://api.github.com/repos/crosbreaker/murkmodTempFix/contents/$1" | jq -r ".content" | base64 -d
 }
 
 install() {
@@ -84,26 +84,9 @@ opposite_num() {
     fi
 }
 
-trytar() {
-    echo "busybox failed! Attempting to use tar"
-    arch=$(uname -m)
-            case "$arch" in
-            x86_64)
-                tar_url="https://github.com/aspect-build/bsdtar-prebuilt/releases/latest/download/tar_linux_amd64" ;;
-            aarch64)
-                tar_url="https://github.com/aspect-build/bsdtar-prebuilt/releases/latest/download/tar_linux_arm64" ;;
-          *)
-            echo "Unsupported architecture: $arch"; exit 1 ;;
-        esac
-        curl --progress-bar -Lko /usr/local/tmp/tar_linux "$tar_url"
-        chmod +x /usr/local/tmp/tar_linux
-        echo "Unzipping with tar"
-        /usr/local/tmp/tar_linux -xf recovery.zip
-}
-
 defog() {
-    futility gbb --set --flash --flags=0x8091 || true # we use futility here instead of the commented out command below because we expect newer chromeos versions and don't want to wait 30 seconds
-    # /usr/share/vboot/bin/set_gbb_flags.sh 0x8091
+    futility gbb --set --flash --flags=0x80b1 || true # we use futility here instead of the commented out command below because we expect newer chromeos versions and don't want to wait 30 seconds
+    # /usr/share/vboot/bin/set_gbb_flags.sh 0x80b1
     crossystem block_devmode=0 || true
     vpd -i RW_VPD -s block_devmode=0 || true
     vpd -i RW_VPD -s check_enrollment=1 || true
@@ -230,7 +213,7 @@ murkmod() {
         echo "No recovery image found for your board and target version. Exiting."
         exit
     fi
-
+    
     mkdir -p /usr/local/tmp
     pushd /mnt/stateful_partition
         set -e
@@ -267,7 +250,7 @@ murkmod() {
         echo "Downloading recovery image from '$FINAL_URL'..."
         curl --progress-bar -k "$FINAL_URL" -o recovery.zip
         echo "Unzipping image... (this may take a while)"
-        /usr/local/tmp/unzip -o recovery.zip || trytar
+        /usr/local/tmp/unzip -o recovery.zip
         rm recovery.zip
         FILENAME=$(find . -maxdepth 2 -name "chromeos_*.bin") # 2 incase the zip format changes
         echo "Found recovery image from archive at $FILENAME"
@@ -330,7 +313,7 @@ murkmod() {
         cgpt add "$dst" -i 4 -P 0
         cgpt add "$dst" -i 2 -P 0
         cgpt add "$dst" -i "$tgt_kern" -P 1
-        echo "Defogging... (if write-protect is disabled, this will set GBB flags to 0x8091)"
+        echo "Defogging... (if write-protect is disabled, this will set GBB flags to 0x80b1)"
         defog
         echo "Cleaning up..."
         losetup -d "$loop"
