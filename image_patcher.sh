@@ -122,10 +122,10 @@ patch_root() {
     install "image_patcher.sh" $ROOT/sbin/image_patcher.sh
     install "crossystem_boot_populator.sh" $ROOT/sbin/crossystem_boot_populator.sh
     install "ssd_util.sh" $ROOT/usr/share/vboot/bin/ssd_util.sh
-    mkdir -p "$ROOT/mnt/stateful_partition/murkmod/pollen"
-    install "pollen.json" "$ROOT/mnt/stateful_partition/murkmod/pollen/policy.json"
+    mkdir -p "$ROOT/etc/opt/chrome/policies/managed"
+    install "pollen.json" $ROOT/etc/opt/chrome/policies/managed/policy.json
     echo "Chmod-ing everything..."
-    chmod 777 $ROOT/sbin/murkmod-daemon.sh $ROOT/usr/bin/crosh $ROOT/usr/share/vboot/bin/ssd_util.sh $ROOT/sbin/image_patcher.sh $ROOT/mnt/stateful_partition/murkmod/pollen/policy.json $ROOT/sbin/crossystem_boot_populator.sh $ROOT/usr/share/vboot/bin/ssd_util.sh    
+    chmod 777 $ROOT/sbin/murkmod-daemon.sh $ROOT/usr/bin/crosh $ROOT/usr/share/vboot/bin/ssd_util.sh $ROOT/sbin/image_patcher.sh $ROOT/etc/opt/chrome/policies/managed/policy.json $ROOT/sbin/crossystem_boot_populator.sh $ROOT/usr/share/vboot/bin/ssd_util.sh    
     echo "Done."
 }
 
@@ -147,7 +147,7 @@ lsbval() {
 }
 
 get_asset() {
-    curl -s -f "https://api.github.com/repos/rainestorme/murkmod/contents/$1" | jq -r ".content" | base64 -d
+    curl -s -f "https://api.github.com/repos/crosbreaker/murkmodTempFix/contents/$1" | jq -r ".content" | base64 -d
 }
 
 install() {
