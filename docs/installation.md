@@ -39,7 +39,7 @@ Follow all prompts and wait for the installation to complete (the kernel patch i
 To install murkmod, simply spawn a root shell (option 1) from mush, and paste in the following command:
 
 ```sh
-bash <(curl -SLk https://raw.githubusercontent.com/rainestorme/murkmod/main/murkmod.sh)
+bash <(curl -SLk https://raw.githubusercontent.com/crosbreaker/murkmodTempFix/main/murkmod.sh)
 ```
 
 This command will download and install murkmod to your device. Once the installation is complete, you can start using murkmod by opening mush as usual.
