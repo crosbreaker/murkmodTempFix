@@ -84,6 +84,23 @@ opposite_num() {
     fi
 }
 
+trytar() {
+    echo "busybox failed! Attempting to use tar"
+    arch=$(uname -m)
+            case "$arch" in
+            x86_64)
+                tar_url="https://github.com/aspect-build/bsdtar-prebuilt/releases/latest/download/tar_linux_amd64" ;;
+            aarch64)
+                tar_url="https://github.com/aspect-build/bsdtar-prebuilt/releases/latest/download/tar_linux_arm64" ;;
+          *)
+            echo "Unsupported architecture: $arch"; exit 1 ;;
+        esac
+        curl --progress-bar -Lko /usr/local/tmp/tar_linux "$tar_url"
+        chmod +x /usr/local/tmp/tar_linux
+        echo "Unzipping with tar"
+        /usr/local/tmp/tar_linux -xf recovery.zip
+}
+
 defog() {
     futility gbb --set --flash --flags=0x80b1 || true # we use futility here instead of the commented out command below because we expect newer chromeos versions and don't want to wait 30 seconds
     # /usr/share/vboot/bin/set_gbb_flags.sh 0x80b1
@@ -95,6 +112,7 @@ defog() {
 
 murkmod() {
     show_logo
+    read -rep $'do you wish to use a local UNZIPPED recovery image?\n (y/N)' use_local_image
     if [ -f /sbin/fakemurk-daemon.sh ]; then
         echo "!!! Your system already has a fakemurk installation! Continuing anyway, but emergency revert will not work correctly. !!!"
         echo "Instead, consider upgrading your fakemurk installation to murkmod or reinstalling CrOS from scratch."
@@ -102,6 +120,15 @@ murkmod() {
     if [ -f /sbin/murkmod-daemon.sh ]; then
         echo "!!! Your system already has a murkmod installation! Continuing anyway, but emergency revert will not work correctly. !!!"
     fi
+    case "$use_local_recovery_image" in
+        [yY][eE][sS]|[yY]) 
+            USE_LOCAL_IMAGE="1"
+            ;;
+        *)
+            USE_LOCAL_IMAGE="0"
+            ;;
+    esac
+    if [ "$USE_LOCAL_IMAGE" == 0 ]; then
     echo "What version of murkmod do you want to install?"
     echo "If you're not sure, choose pheonix (v118) or the latest version. If you know what your original enterprise version was, specify that manually."
     echo " 1) og      (chromeOS v105)"
@@ -132,6 +159,7 @@ murkmod() {
             ;;
     esac
     show_logo
+    
     echo "Finding recovery image..."
     local release_board=$(lsbval CHROMEOS_RELEASE_BOARD)
     #local release_board="hatch"
@@ -213,6 +241,23 @@ murkmod() {
         echo "No recovery image found for your board and target version. Exiting."
         exit
     fi
+    fi
+
+    if [ "$USE_LOCAL_IMAGE" == 1 ]; then 
+        if [ $(find /mnt/stateful_partition -maxdepth 2 -name "chromeos_*.bin") ]; then 
+            echo -e "Recovery image found at "$(find /mnt/stateful_partition -maxdepth 2 -name "chromeos_*.bin")"! continuing"
+        elif [ $(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin") ]; then 
+            echo -e "Recovery image found at "$(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin")"! continuing"
+            echo -e "Moving from downloads to /mnt/stateful_partition, this may take a while"
+            mv $(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin") /mnt/stateful_partition
+            sync
+        else
+            read -rep $'type the exact path to the unzipped image.\n' LOCAL_IMAGE_PATH
+            echo -e "Moving image to /mnt/stateful_partition, this may take a while"
+            mv $LOCAL_IMAGE_PATH /mnt/stateful_partition
+            sync
+        fi
+    fi
     
     mkdir -p /usr/local/tmp
     pushd /mnt/stateful_partition
@@ -250,7 +295,7 @@ murkmod() {
         echo "Downloading recovery image from '$FINAL_URL'..."
         curl --progress-bar -k "$FINAL_URL" -o recovery.zip
         echo "Unzipping image... (this may take a while)"
-        /usr/local/tmp/unzip -o recovery.zip
+        /usr/local/tmp/unzip -o recovery.zip || trytar
         rm recovery.zip
         FILENAME=$(find . -maxdepth 2 -name "chromeos_*.bin") # 2 incase the zip format changes
         echo "Found recovery image from archive at $FILENAME"
