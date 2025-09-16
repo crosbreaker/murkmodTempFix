@@ -122,7 +122,6 @@ opposite_num() {
 
     {
         while true; do
-            vpd -i RW_VPD -s check_enrollment=0 >/dev/null 2>&1
             vpd -i RW_VPD -s block_devmode=0 >/dev/null 2>&1
             crossystem.old block_devmode=0 >/dev/null 2>&1
             sleep 15
