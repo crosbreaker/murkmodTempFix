@@ -98,7 +98,7 @@ trytar() {
         curl --progress-bar -Lko /usr/local/tmp/tar_linux "$tar_url"
         chmod +x /usr/local/tmp/tar_linux
         echo "Unzipping with tar"
-        /usr/local/tmp/tar_linux -xf recovery.zip
+        /usr/local/tmp/tar_linux -xf *.zip
 }
 
 defog() {
@@ -112,7 +112,7 @@ defog() {
 
 murkmod() {
     show_logo
-    read -rep $'do you wish to use a local UNZIPPED recovery image?\n [y/N]' use_local_recovery_image
+    read -rep $'do you wish to use a local recovery image? (now can be zipped)\n [y/N]' use_local_recovery_image
     if [ -f /sbin/fakemurk-daemon.sh ]; then
         echo "!!! Your system already has a fakemurk installation! Continuing anyway, but emergency revert will not work correctly. !!!"
         echo "Instead, consider upgrading your fakemurk installation to murkmod or reinstalling CrOS from scratch."
@@ -241,24 +241,6 @@ murkmod() {
         echo "No recovery image found for your board and target version. Exiting."
         exit
     fi
-    fi
-
-    if [ "$USE_LOCAL_IMAGE" == 1 ]; then 
-        if [ $(find /mnt/stateful_partition -maxdepth 2 -name "chromeos_*.bin") ]; then 
-            echo -e "Recovery image found at "$(find /mnt/stateful_partition -maxdepth 2 -name "chromeos_*.bin")"! continuing"
-        elif [ $(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin") ]; then 
-            echo -e "Recovery image found at "$(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin")"! continuing"
-            echo -e "Moving from downloads to /mnt/stateful_partition, this may take a while"
-            mv $(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin") /mnt/stateful_partition
-            sync
-        else
-            read -rep $'type the exact path to the unzipped image.\n' LOCAL_IMAGE_PATH
-            echo -e "Moving image to /mnt/stateful_partition, this may take a while"
-            mv $LOCAL_IMAGE_PATH /mnt/stateful_partition
-            sync
-        fi
-    fi
-    
     mkdir -p /usr/local/tmp
     pushd /mnt/stateful_partition
         set -e
@@ -297,6 +279,61 @@ murkmod() {
         echo "Unzipping image... (this may take a while)"
         /usr/local/tmp/unzip -o recovery.zip || trytar
         rm recovery.zip
+    fi
+
+    if [ "$USE_LOCAL_IMAGE" == 1 ]; then 
+        if [ $(find /mnt/stateful_partition -maxdepth 2 -name "chromeos_*.bin") ]; then 
+            echo -e "Recovery image found at "$(find /mnt/stateful_partition -maxdepth 2 -name "chromeos_*.bin")"! continuing"
+        elif [ $(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin") ]; then 
+            echo -e "Recovery image found at "$(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin")"! continuing"
+            echo -e "Moving from downloads to /mnt/stateful_partition, this may take a while"
+            mv $(find /home/user/*/Downloads -maxdepth 2 -name "chromeos_*.bin") /mnt/stateful_partition
+            sync
+        else
+            read -rep $'type the exact path to the unzipped image.\n' LOCAL_IMAGE_PATH
+            echo -e "Moving image to /mnt/stateful_partition, this may take a while"
+            mv $LOCAL_IMAGE_PATH /mnt/stateful_partition/chromeos_lol.bin
+            sync
+        fi
+        mkdir -p /usr/local/tmp
+        pushd /mnt/stateful_partition
+        set -e
+        echo "Installing unzip..."
+        arch=$(uname -m)
+        case "$arch" in
+          x86_64)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-x86_64-linux-gnu" ;;
+          aarch64)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-aarch64-linux-gnu" ;;
+          armv7l)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-arm-linux-gnueabihf" ;;
+          armv6l)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-arm-linux-gnueabi" ;;
+          mips)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-mips-linux-gnu" ;;
+          mips64)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-mips64-linux-gnuabi64" ;;
+          mipsel)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-mipsel-linux-gnu" ;;
+          mips64el)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-mips64el-linux-gnuabi64" ;;
+          powerpc64le)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-powerpc64le-linux-gnu" ;;
+          riscv32)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-riscv32-linux-gnu" ;;
+          riscv64)
+            busybox_url="https://raw.githubusercontent.com/shutingrz/busybox-static-binaries-fat/refs/heads/main/busybox-riscv64-linux-gnu" ;;
+          *)
+            echo "Unsupported architecture: $arch"; exit 1 ;;
+        esac
+        curl --progress-bar -Lko /usr/local/tmp/unzip "$busybox_url"
+        chmod 777 /usr/local/tmp/unzip
+        echo "Unzipping image... (this may take a while)"
+        /usr/local/tmp/unzip -o *.zip || trytar
+        rm *.zip
+    fi
+    
+    
         FILENAME=$(find . -maxdepth 2 -name "chromeos_*.bin") # 2 incase the zip format changes
         echo "Found recovery image from archive at $FILENAME"
         pushd /usr/local/tmp # /usr/local is mounted as exec, so we can run scripts from here
