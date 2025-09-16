@@ -179,9 +179,8 @@ else
 	rm -rf /root/testingForVerity
     else
 	/usr/share/vboot/bin/make_dev_ssd.sh --remove_rootfs_verification --partitions "$get_booted_kernnum"
-   sed -i 's/stable-channel/testimage-channel/' /etc/lsb-release
    fi 
-	
+    sed -i 's/stable-channel/testimage-channel/' /etc/lsb-release
     echo "Plugins run. Handing over to real startup..."
     if [ ! -f /new-startup ]; then
         exec /sbin/chromeos_startup.sh.old
