@@ -178,7 +178,7 @@ else
 	echo "verity disabled"
 	rm -rf /root/testingForVerity
     else
-	/usr/share/vboot/bin/make_dev_ssd.sh --remove_rootfs_verification --partitions "$get_booted_kernnum"
+	/usr/share/vboot/bin/make_dev_ssd.sh -f --remove_rootfs_verification --partitions "$get_booted_kernnum"
    fi 
     sed -i 's/stable-channel/testimage-channel/' /etc/lsb-release
     echo "Plugins run. Handing over to real startup..."
