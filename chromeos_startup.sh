@@ -47,15 +47,20 @@ DST=$(get_largest_cros_blockdev)
 if [ -z $DST ]; then
     DST=/dev/mmcblk0
 fi
-
-
+get_booted_kernnum() {
+   if (($(cgpt show -n "$DST" -i 2 -P) > $(cgpt show -n "$DST" -i 4 -P))); then
+	echo -n 2
+   else
+	echo -n 4
+   fi
+}
 
 # funny boot messages
 # multi-liners
 cat <<EOF >/usr/share/chromeos-assets/text/boot_messages/en/block_devmode_virtual.txt
 Oh fuck - ChromeOS is trying to kill itself.
 ChromeOS detected developer mode and is trying to disable it to
-comply with FWMP. This is most likely a bug and should be reported to
+comply with crossystem/vpd. This is most likely a bug and should be reported to
 the murkmod GitHub Issues page.
 EOF
 cat <<EOF >/usr/share/chromeos-assets/text/boot_messages/en/self_repair.txt
@@ -169,7 +174,14 @@ else
             echo "Overlaid pollen policy to $POLLEN_DST_RO"
         fi
     fi
-
+    if touch /root/testingForVerity; then
+	echo "verity disabled"
+	rm -rf /root/testingForVerity
+    else
+	/usr/share/vboot/bin/make_dev_ssd.sh --remove_rootfs_verification --partitions "$get_booted_kernnum"
+   sed -i 's/stable-channel/testimage-channel/' /etc/lsb-release
+   fi 
+	
     echo "Plugins run. Handing over to real startup..."
     if [ ! -f /new-startup ]; then
         exec /sbin/chromeos_startup.sh.old
