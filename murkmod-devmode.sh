@@ -112,7 +112,7 @@ defog() {
 
 murkmod() {
     show_logo
-    read -rep $'do you wish to use a local recovery image? (now can be zipped)\n [y/N]' use_local_recovery_image
+    read -rep $'do you wish to use a local recovery image? (must be unzipped)\n [y/N]' use_local_recovery_image
     if [ -f /sbin/fakemurk-daemon.sh ]; then
         echo "!!! Your system already has a fakemurk installation! Continuing anyway, but emergency revert will not work correctly. !!!"
         echo "Instead, consider upgrading your fakemurk installation to murkmod or reinstalling CrOS from scratch."
