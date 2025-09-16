@@ -112,7 +112,7 @@ defog() {
 
 murkmod() {
     show_logo
-    read -rep $'do you wish to use a local UNZIPPED recovery image?\n (y/N)' use_local_image
+    read -rep $'do you wish to use a local UNZIPPED recovery image?\n [y/N]' use_local_recovery_image
     if [ -f /sbin/fakemurk-daemon.sh ]; then
         echo "!!! Your system already has a fakemurk installation! Continuing anyway, but emergency revert will not work correctly. !!!"
         echo "Instead, consider upgrading your fakemurk installation to murkmod or reinstalling CrOS from scratch."
@@ -128,7 +128,7 @@ murkmod() {
             USE_LOCAL_IMAGE="0"
             ;;
     esac
-    if [ "$USE_LOCAL_IMAGE" == 0 ]; then
+    if [ "$USE_LOCAL_IMAGE" != 1 ]; then
     echo "What version of murkmod do you want to install?"
     echo "If you're not sure, choose pheonix (v118) or the latest version. If you know what your original enterprise version was, specify that manually."
     echo " 1) og      (chromeOS v105)"
