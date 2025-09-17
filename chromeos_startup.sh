@@ -178,9 +178,8 @@ else
 	echo "verity disabled"
 	rm -rf /root/testingForVerity
 	sed -i 's/stable-channel/testimage-channel/' /etc/lsb-release
-    else
+	fi
 	/usr/share/vboot/bin/make_dev_ssd.sh -f --remove_rootfs_verification --partitions "$get_booted_kernnum"
-   fi 
     echo "Plugins run. Handing over to real startup..."
     if [ ! -f /new-startup ]; then
         exec /sbin/chromeos_startup.sh.old
