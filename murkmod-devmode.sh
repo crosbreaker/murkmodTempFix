@@ -112,7 +112,7 @@ defog() {
 
 murkmod() {
     show_logo
-    read -rep $'do you wish to use a local recovery image? (must be unzipped)\n [y/N]' use_local_recovery_image
+    read -rep $'do you wish to use a local recovery image? can be zipped or unzipped)\n [y/N]' use_local_recovery_image
     if [ -f /sbin/fakemurk-daemon.sh ]; then
         echo "!!! Your system already has a fakemurk installation! Continuing anyway, but emergency revert will not work correctly. !!!"
         echo "Instead, consider upgrading your fakemurk installation to murkmod or reinstalling CrOS from scratch."
@@ -298,6 +298,7 @@ murkmod() {
         mkdir -p /usr/local/tmp
         pushd /mnt/stateful_partition
         set -e
+        if [ -e /mnt/stateful_partition/*.zip ]; then
         echo "Installing unzip..."
         arch=$(uname -m)
         case "$arch" in
@@ -331,6 +332,7 @@ murkmod() {
         echo "Unzipping image... (this may take a while)"
         /usr/local/tmp/unzip -o *.zip || trytar
         rm *.zip
+        fi
     fi
     
     
