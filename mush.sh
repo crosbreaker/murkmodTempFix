@@ -356,15 +356,18 @@ autodisableexts() {
     disable_ext_nokill "enfolipbjmnmleonhhebhalojdpcpdoo" # Screenshot reader
     disable_ext_nokill "joflmkccibkooplaeoinecjbmdebglab" # Securly
     disable_ext_nokill "iheobagjkfklnlikgihanlhcddjoihkg" # Securly again
+    disable_ext_nokill "ckecmkbnoanpgplccmnoikfmpcdladkc" # Another Securly
     disable_ext_nokill "adkcpkpghahmbopkjchobieckeoaoeem" # LightSpeed
     disable_ext_nokill "jcdhmojfecjfmbdpchihbeilohgnbdci" # Cisco Umbrella
     disable_ext_nokill "jdogphakondfdmcanpapfahkdomaicfa" # ContentKeeper Authenticator
     disable_ext_nokill "aceopacgaepdcelohobicpffbbejnfac" # Hapara
     disable_ext_nokill "kmffehbidlalibfeklaefnckpidbodff" # iBoss
     disable_ext_nokill "jaoebcikabjppaclpgbodmmnfjihdngk" # LightSpeed Classroom
+    disable_ext_nokill "keknjhjnninjadlkapachhhjfmfnofcb" # LanSchool Air 
     disable_ext_nokill "ghlpmldmjjhmdgmneoaibbegkjjbonbk" # Blocksi
     disable_ext_nokill "ddfbkhpmcdbciejenfcolaaiebnjcbfc" # Linewize
     disable_ext_nokill "jfbecfmiegcjddenjhlbhlikcbfmnafd" # Securly Classroom
+    disable_ext_nokill "hkobaiihndnbfhbkmjjfbdimfbdcppdh" # Another Securly Classroom
     disable_ext_nokill "jjpmjccpemllnmgiaojaocgnakpmfgjg" # Impero
     disable_ext_nokill "feepmdlmhplaojabeoecaobfmibooaid" # OrbitNote
     disable_ext_nokill "dmhpekdihnngbkinliefnclgmgkpjeoo" # GoGuardian License
@@ -374,10 +377,10 @@ autodisableexts() {
 }
 
 set_passwd() {
-  echo "Enter a new password to use for mush. This will be required to perform any future administrative actions, so make sure you write it down somewhere!"
+  echo "(DO NOT USE, CURRENTLY BROKEN. to unbrick open vt2 and delete /mnt/stateful_partition/murkmod/mush_password) Enter a new password to use for mush. This will be required to perform any future administrative actions, so make sure you write it down somewhere!"
   read -r -p " > " newpassword
-  doas "touch /mnt/stateful_partition/murkmod/mush_password"
-  doas "echo '$newpassword'> /mnt/stateful_partition/murkmod/mush_password"
+  sudo touch /mnt/stateful_partition/murkmod/mush_password
+  sudo echo '$newpassword'> /mnt/stateful_partition/murkmod/mush_password
 }
 
 remove_passwd() {
