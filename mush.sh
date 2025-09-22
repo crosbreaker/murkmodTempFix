@@ -1004,17 +1004,12 @@ attempt_dev_install() {
 }
 
 edit_pollen() {
-    mkdir -p /mnt/stateful_partition/murkmod/pollen
-    if [ ! -f /mnt/stateful_partition/murkmod/pollen/policy.json ]; then
-        echo "{}" > /mnt/stateful_partition/murkmod/pollen/policy.json
-    fi
-    edit /mnt/stateful_partition/murkmod/pollen/policy.json
-    if touch /etc/opt/chrome/policies/managed/.murkmod_test 2>/dev/null; then
-        rm -f /etc/opt/chrome/policies/managed/.murkmod_test
-        cp /mnt/stateful_partition/murkmod/pollen/policy.json /etc/opt/chrome/policies/managed/policy.json
+    if touch /testingForVerityHopefullyYouDontHaveAFileNamedThisLOL; then
+        vi /etc/opt/chrome/policies/managed/policy.json
+        rm -rf /testingForVerityHopefullyYouDontHaveAFileNamedThisLOL
     else
-        mkdir -p /tmp/overlay/etc/opt/chrome/policies/managed
-        cp /mnt/stateful_partition/murkmod/pollen/policy.json /tmp/overlay/etc/opt/chrome/policies/managed/policy.json
+        vi /mnt/stateful_partition/murkmod/pollen/policy.json
+        mount --bind /mnt/stateful_partition/murkmod/pollen/policy.json /etc/opt/chrome/policies/managed/policy.json
     fi
 }
 
